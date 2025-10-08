@@ -1,213 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Sticky Notes — Local Only</title>
-  <style>
-    :root{
-      --bg:#0f172a;
-      --panel:#111827cc;
-      --muted:#94a3b8;
-      --accent:#22c55e;
-      --danger:#ef4444;
-      --note-w: 240px;
-      --note-h: 200px;
-      --radius:16px;
-      --shadow: 0 10px 25px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial; background: radial-gradient(1200px 800px at 20% -10%, #1e293b 0%, #0b1223 45%, var(--bg) 100%); color:#e5e7eb; overflow:hidden;}
-    .topbar{position:fixed; inset: 16px 16px auto 16px; display:flex; gap:8px; align-items:center; z-index:10000; background:linear-gradient(180deg, #0b1223aa, #0b1223aa), #0b1223; backdrop-filter: blur(8px); border:1px solid #1f2937; border-radius:24px; padding:10px 12px; box-shadow: var(--shadow);}
-    .topbar h1{font-size:16px; font-weight:700; margin:0 8px 0 2px; color:#f8fafc}
-    .topbar .hint{color:var(--muted); font-size:12px}
-    .spacer{flex:1}
-    button{border:1px solid #243142; background:#111827; color:#e5e7eb; padding:8px 12px; border-radius:12px; cursor:pointer; font-weight:600; transition:.18s;}
-    button:hover{ transform: translateY(-1px); border-color:#2f4058; box-shadow: 0 4px 14px rgba(0,0,0,.3)}
-    .btn-accent{ background:#102a19; border-color:#184a2a }
-    .btn-danger{ background:#2a1414; border-color:#512222 }
-    .counter{font-size:12px; color:#a3b2c5; padding:0 6px}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My First Hello World</title>
+    <style>
+        /* CSS Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
 
-    #board{ position:fixed; inset:0; padding-top:70px; }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 500px;
+            animation: fadeIn 1s ease-in;
+        }
 
-    .note{
-      position:absolute; width:var(--note-w); height:var(--note-h);
-      border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden; user-select:none; border:1px solid rgba(0,0,0,.15);
-      resize: both; min-width:160px; min-height:120px; background-clip: padding-box;
-    }
-    .note .header{height:40px; display:flex; align-items:center; gap:8px; padding:8px 10px; cursor:grab; font-weight:700; background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(0,0,0,.04)); position:relative;}
-    .note .title{ flex:1; outline:none; border:none; background:transparent; font: inherit; color:#0f172a; padding:6px 8px; border-radius:8px; max-width:60%; opacity:.85 }
-    .note .content{height: calc(100% - 40px); padding:10px 12px; overflow:auto; outline:none; font-size:14px; line-height:1.45;}
-    .note .controls{ display:flex; flex-direction: row; gap:6px; }
-    .icon-btn{width:28px; height:28px; border-radius:10px; display:grid; place-items:center; background: rgba(255,255,255,.55); border:1px solid rgba(0,0,0,.1); cursor:pointer}
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    /* Note color themes */
-    .yellow{ background:#fde68a }
-    .pink{ background:#fbcfe8 }
-    .green{ background:#bbf7d0 }
-    .blue{ background:#bae6fd }
-    .purple{ background:#e9d5ff }
-    .orange{ background:#fed7aa }
+        h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-    /* Text color themes */
-    .text-black{ color:#000 }
-    .text-red{ color:#b91c1c }
-    .text-green{ color:#065f46 }
-    .text-blue{ color:#1e3a8a }
-    .text-purple{ color:#5b21b6 }
-    .text-gray{ color:#374151 }
+        .greeting {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
 
-    /* Palette popover */
-    .palette{ position:absolute; top:42px; right:10px; background:#0b1223ee; border:1px solid #243142; border-radius:12px; padding:8px; display:none; grid-template-columns: repeat(6, 28px); gap:8px; box-shadow: var(--shadow); z-index:9999 }
-    .palette.open{ display:grid }
-    .swatch{ width:28px; height:28px; border-radius:8px; border:1px solid rgba(0,0,0,.15); cursor:pointer }
-    .swatch.yellow{ background:#fde68a }
-    .swatch.pink{ background:#fbcfe8 }
-    .swatch.green{ background:#bbf7d0 }
-    .swatch.blue{ background:#bae6fd }
-    .swatch.purple{ background:#e9d5ff }
-    .swatch.orange{ background:#fed7aa }
-  </style>
+        .button-group {
+            margin: 20px 0;
+        }
+
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .message.show {
+            opacity: 1;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .fun {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .counter {
+            font-size: 1.1rem;
+            color: #555;
+            margin-top: 20px;
+        }
+
+        .highlight {
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-  <div class="topbar">
-    <h1>Sticky Notes</h1>
-    <span class="hint">Local & private</span>
-    <span class="spacer"></span>
-    <button id="newNote" class="btn-accent">＋ New</button>
-    <button id="exportNotes">Export</button>
-    <button id="importNotes">Import</button>
-    <button id="clearAll" class="btn-danger">Clear</button>
-    <span id="count" class="counter"></span>
-  </div>
-  <div id="board"></div>
-
-  <script>
-  (()=>{
-    const STORAGE_KEY = 'stickyNotes_v4';
-    const board = document.getElementById('board');
-
-    let zTop = 10;
-    const palette = ['yellow','pink','green','blue','purple','orange'];
-    const textColors = ['text-black','text-red','text-green','text-blue','text-purple','text-gray'];
-
-    const uid = ()=> Math.random().toString(36).slice(2,9);
-    const save = (notes)=> localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-    const load = ()=> { try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]') }catch{ return [] } };
-
-    function noteTemplate(n){
-      const el = document.createElement('div');
-      el.className = `note ${n.color} ${n.textColor||'text-black'}`;
-      el.style.left = (n.x??40)+'px'; el.style.top = (n.y??80)+'px';
-      el.style.width = (n.w||240)+'px'; el.style.height = (n.h||200)+'px';
-      el.style.zIndex = n.z||1;
-      el.dataset.id = n.id;
-      el.innerHTML = `
-        <div class="header">
-          <input class="title" type="text" placeholder="Title" value="${n.title||''}" />
-          <div class="controls">
-            <button class="icon-btn btn-bg" title="Background color">🎨</button>
-            <button class="icon-btn btn-text" title="Text color">🖌️</button>
-            <button class="icon-btn btn-del" title="Delete">✕</button>
-          </div>
-          <div class="palette" aria-label="Color palette" role="menu">
-            ${palette.map(c=>`<button class="swatch ${c}" data-color="${c}" title="${c}"></button>`).join('')}
-          </div>
+    <div class="container">
+        <h1 id="mainTitle">Hello, World! 🌍</h1>
+        
+        <div class="greeting">
+            Welcome to your first web page!
         </div>
-        <div class="content" contenteditable="true">${n.content||''}</div>`;
-      return el;
-    }
 
-    const fromEl = (el)=>({
-      id: el.dataset.id,
-      title: el.querySelector('.title').value,
-      content: el.querySelector('.content').innerHTML,
-      x: parseInt(el.style.left)||0,
-      y: parseInt(el.style.top)||0,
-      w: Math.round(el.offsetWidth),
-      h: Math.round(el.offsetHeight),
-      z: parseInt(el.style.zIndex||1),
-      color: palette.find(c=>el.classList.contains(c))||palette[0],
-      textColor: textColors.find(c=>el.classList.contains(c))||'text-black'
-    });
+        <div class="button-group">
+            <button onclick="changeGreeting()">Change Greeting</button>
+            <button onclick="showTime()">Show Time</button>
+            <button onclick="changeColor()">Change Colors</button>
+            <button onclick="showFact()">Fun Fact</button>
+        </div>
 
-    const persist = ()=> save([...board.querySelectorAll('.note')].map(fromEl));
+        <div id="messageBox" class="message"></div>
+        
+        <div class="counter">
+            Button clicks: <span id="clickCounter" class="highlight">0</span>
+        </div>
+    </div>
 
-    function newNote(initial={}){
-      const note = { id: uid(), title: initial.title||'', content: initial.content||'', x: initial.x??40, y: initial.y??80, w: initial.w, h: initial.h, z: ++zTop, color: initial.color||palette[0], textColor: initial.textColor||'text-black' };
-      const el = noteTemplate(note); board.appendChild(el); attach(el); persist();
-    }
+    <script>
+        // JavaScript Code
+        let clickCount = 0;
+        let colorIndex = 0;
+        
+        // Array of different greetings
+        const greetings = [
+            "Hello, World! 🌍",
+            "Hi there, Coder! 👨‍💻",
+            "Welcome, Developer! 🚀",
+            "Greetings, Human! 👋",
+            "Hey, Future Programmer! ⭐"
+        ];
 
-    function setColor(el, color){
-      palette.forEach(c=> el.classList.remove(c));
-      el.classList.add(color);
-      persist();
-    }
+        // Array of different color schemes
+        const colorSchemes = [
+            "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+            "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+            "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+            "linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+        ];
 
-    function cycleTextColor(el){
-      const i = textColors.findIndex(c=>el.classList.contains(c));
-      const next = textColors[(i+1)%textColors.length];
-      textColors.forEach(c=>el.classList.remove(c));
-      el.classList.add(next); persist();
-    }
+        // Array of fun programming facts
+        const funFacts = [
+            "The first computer bug was an actual bug! 🐛",
+            "JavaScript was created in just 10 days! ⚡",
+            "The word 'computer' originally referred to people! 👥",
+            "The first programmer was Ada Lovelace in 1843! 👩‍💻",
+            "There are more possible games of chess than atoms in the universe! ♟️"
+        ];
 
-    function attach(el){
-      const header = el.querySelector('.header');
-      const btnBg = el.querySelector('.btn-bg');
-      const btnTxt = el.querySelector('.btn-text');
-      const btnDel = el.querySelector('.btn-del');
-      const paletteEl = el.querySelector('.palette');
+        let greetingIndex = 0;
 
-      // focus to front
-      [header, el.querySelector('.content')].forEach(n=> n.addEventListener('pointerdown', ()=>{ zTop+=1; el.style.zIndex=zTop; }));
+        function updateCounter() {
+            clickCount++;
+            document.getElementById('clickCounter').textContent = clickCount;
+        }
 
-      // drag by header
-      let dragging=false, startX=0, startY=0, ox=0, oy=0;
-      header.addEventListener('pointerdown', e=>{ if(e.button!==0) return; dragging=true; startX=e.clientX; startY=e.clientY; ox=parseInt(el.style.left)||0; oy=parseInt(el.style.top)||0; header.setPointerCapture(e.pointerId); });
-      header.addEventListener('pointermove', e=>{ if(!dragging) return; el.style.left = (ox + (e.clientX-startX))+'px'; el.style.top = (oy + (e.clientY-startY))+'px'; });
-      const endDrag = e=>{ if(!dragging) return; dragging=false; header.releasePointerCapture?.(e.pointerId); persist(); };
-      header.addEventListener('pointerup', endDrag); header.addEventListener('pointercancel', endDrag);
+        function showMessage(message, type = 'info') {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.className = `message ${type} show`;
+            
+            // Hide message after 3 seconds
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000);
+        }
 
-      // edits
-      el.querySelector('.title').addEventListener('input',persist);
-      el.querySelector('.content').addEventListener('input',persist);
+        function changeGreeting() {
+            updateCounter();
+            greetingIndex = (greetingIndex + 1) % greetings.length;
+            document.getElementById('mainTitle').textContent = greetings[greetingIndex];
+            showMessage("Greeting changed successfully! 🎉", "success");
+        }
 
-      // palette toggle and pick
-      btnBg.addEventListener('click', (e)=>{ e.stopPropagation(); paletteEl.classList.toggle('open'); });
-      paletteEl.addEventListener('click', (e)=>{
-        const target = e.target.closest('.swatch');
-        if(!target) return;
-        setColor(el, target.dataset.color);
-        paletteEl.classList.remove('open');
-      });
-      // close palette when clicking elsewhere
-      document.addEventListener('click', (e)=>{ if(!paletteEl.contains(e.target) && e.target!==btnBg) paletteEl.classList.remove('open'); });
+        function showTime() {
+            updateCounter();
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            const dateString = now.toLocaleDateString();
+            showMessage(`Current time: ${timeString} on ${dateString} ⏰`, "info");
+        }
 
-      btnTxt.addEventListener('click', ()=> cycleTextColor(el));
-      btnDel.addEventListener('click', ()=>{ el.remove(); persist(); });
+        function changeColor() {
+            updateCounter();
+            colorIndex = (colorIndex + 1) % colorSchemes.length;
+            document.body.style.background = colorSchemes[colorIndex];
+            showMessage("Background color changed! 🎨", "success");
+        }
 
-      // persist size changes
-      const ro = new ResizeObserver(()=> persist()); ro.observe(el);
-    }
+        function showFact() {
+            updateCounter();
+            const randomFact = funFacts[Math.floor(Math.random() * funFacts.length)];
+            showMessage(randomFact, "fun");
+        }
 
-    // toolbar
-    document.getElementById('newNote').onclick=()=>newNote();
-    document.getElementById('clearAll').onclick=()=>{ if(confirm('Clear all?')){ board.innerHTML=''; persist(); } };
-    document.getElementById('exportNotes').onclick=()=>{
-      const data = JSON.stringify([...board.querySelectorAll('.note')].map(fromEl), null, 2);
-      const blob = new Blob([data], {type:'application/json'}); const url = URL.createObjectURL(blob);
-      const a = Object.assign(document.createElement('a'), {href:url, download:'sticky-notes.json'}); document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    };
-    document.getElementById('importNotes').onclick=()=>{
-      const input = Object.assign(document.createElement('input'), {type:'file', accept:'application/json'});
-      input.onchange = (e)=>{ const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = ()=>{ try{ const arr = JSON.parse(reader.result); if(!Array.isArray(arr)) throw new Error('Invalid format'); board.innerHTML=''; arr.forEach(n=>{ const el = noteTemplate(n); board.appendChild(el); attach(el); zTop=Math.max(zTop, n.z||1) }); persist(); }catch(err){ alert('Import failed: '+err.message) } }; reader.readAsText(file); };
-      input.click();
-    };
+        // Welcome message when page loads
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                showMessage("Welcome to web development! Click the buttons to explore! 🎊", "success");
+            }, 1000);
+        });
 
-    // load existing
-    (load()||[]).forEach(n=>{ const el=noteTemplate(n); board.appendChild(el); attach(el); zTop=Math.max(zTop,n.z||1) });
-  })()
-  </script>
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            switch(event.key) {
+                case '1':
+                    changeGreeting();
+                    break;
+                case '2':
+                    showTime();
+                    break;
+                case '3':
+                    changeColor();
+                    break;
+                case '4':
+                    showFact();
+                    break;
+            }
+        });
+    </script>
 </body>
 </html>
